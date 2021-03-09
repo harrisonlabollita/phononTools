@@ -1,0 +1,40 @@
+# Matplotlib style for my published figures
+# AUTHOR: Harrison LaBollita
+# Last Edited: 11/11/2020
+
+
+
+# set x axis
+xtick.direction : in
+xtick.major.size : 7
+xtick.major.width : 0.5
+xtick.minor.size : 3.5
+xtick.minor.width : 0.5
+xtick.minor.visible : True
+xtick.top : True
+xtick.labelsize : 15
+
+# set y axis
+ytick.direction : in
+ytick.major.size : 7
+ytick.major.width : 0.5
+ytick.minor.size : 3.5
+ytick.minor.width : 0.5
+ytick.minor.visible : True
+ytick.right : True
+ytick.labelsize : 15
+
+# set line widths
+axes.linewidth : 1.5
+lines.linewidth : 1.0
+
+legend.frameon : False
+
+savefig.bbox : tight
+savefig.pad_inches : 0.05
+
+font.serif : Computer Modern Roman 
+font.family : serif
+
+text.usetex : True
+text.latex.preamble : \usepackage{amsmath}
