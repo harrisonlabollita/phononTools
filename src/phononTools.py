@@ -107,6 +107,9 @@ def plotParams(style):
 
 
 def processMesh(mesh_file):
+    # Routint that process the mesh.yaml file
+    # Gets the eigenvectors and eigenvalues at q = <0.0 0.0 0.0>
+    # Returns the phonon frequencies and phonon normal modes as arrays
     print("Processing mesh file...{0:s}".format(mesh_file))
     mesh = yaml.load(open(mesh_file), Loader=yaml.FullLoader)
     print("Getting eigenvectors at q-point {0} for {1} atoms".format(mesh["phonon"][0]["q-position"], mesh["natom"]))
@@ -121,6 +124,8 @@ def processMesh(mesh_file):
     return phononFrequencies, phononNormalModes
 
 def processIrreps(irreps_file):
+    # Routine that process the irreps.yaml file
+    # Returns: A dictionary with the irreducible representation and the corresponding frequencies
     print("Processing irreps file...{0:s}".format(irreps_file))
     irreps = yaml.load(open(irreps_file), Loader=yaml.FullLoader)
     print("Crystal point group: {0:s}".format(irreps["point_group"]))
@@ -144,6 +149,9 @@ def processIrreps(irreps_file):
     return frequency_table
 
 def processBands(band_file):
+    # Process the band.yaml file and plot bands
+    # Optional: provide a dispersion.style file to customize plot
+ 
     print("Processing band file...{0:s}".format(band_file))
     bands = yaml.load(open(band_file), Loader=yaml.FullLoader)
     qpoints = bands["nqpoint"]
@@ -210,21 +218,14 @@ def processBands(band_file):
     else:
         plt.savefig('phonon_disperion.pdf', format = 'pdf')
 
-def main(mesh_file, irreps_file, band_file):
-    if mesh_file != None and irreps_file != None:
-        phononFrequencies, phononNormalModes = processMesh(mesh_file)
-        frequency_table = processIrreps(irreps_file)
-        return phononFrequencies, phononNormalModes, frequency_table
-    if mesh_file != None and irreps_file == None:
-        phononFrequencies, phononNormalModes = processMesh(mesh_file)
-        return phononFrequencies, phononNormalModes
-    if mesh_file == None and irreps_file != None:
-        frequency_table = processIrreps(band_file)
-        return frequency_table
-    if mesh_file == None and irreps_file == None and band_file != None:
-        processBands(band_file)
-    if mesh_file == None and irreps_file == None and band_file == None:
-        print("Aborting....")
+###################### MAIN PROGRAM ############################
+if mesh_file != None and irreps_file != None:
+    phononFrequencies, phononNormalModes = processMesh(mesh_file)
+    frequency_table = processIrreps(irreps_file)
+if mesh_file != None and irreps_file == None:
+    phononFrequencies, phononNormalModes = processMesh(mesh_file)
+if mesh_file == None and irreps_file != None:
+    frequency_table = processIrreps(band_file)
+if mesh_file == None and irreps_file == None and band_file != None:
+    processBands(band_file)
 
-if __name__ == "__main__":
-    main(mesh_file, irreps_file, band_file)
