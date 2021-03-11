@@ -151,7 +151,7 @@ def processIrreps(irreps_file):
 def processBands(band_file):
     # Process the band.yaml file and plot bands
     # Optional: provide a dispersion.style file to customize plot
- 
+
     print("Processing band file...{0:s}".format(band_file))
     bands = yaml.load(open(band_file), Loader=yaml.FullLoader)
     qpoints = bands["nqpoint"]
@@ -172,7 +172,7 @@ def processBands(band_file):
     try:
         style = open("dispersion.style")
     except:
-        plt.figure()
+        plt.figure(figsize = (4,6))
         myRed = '#FF503D'
         for f in range(len(frequencies)):
             plt.plot(distance, frequencies[f], color = myRed, lw = 1)
@@ -184,7 +184,7 @@ def processBands(band_file):
         plt.savefig('phonon_disperion.pdf', format = 'pdf')
     parameters = plotParams("dispersion.style")
     myRed = '#FF503D'
-    plt.figure()
+    plt.figure(figsize = (4,6))
     plt.plot(np.linspace(np.min(distance), np.max(distance), 100), [0 for _ in range(100)], 'k--', lw = 0.5)
     if parameters["color"] != None:
         for f in range(len(frequencies)):
@@ -195,7 +195,7 @@ def processBands(band_file):
     if parameters["ticklabels"] != None:
         for lab in range(len(parameters["ticklabels"])):
             if parameters["ticklabels"][lab] == "Gamma":
-                parameters["ticklabels"][lab] == r"$\Gamma$"
+                parameters["ticklabels"][lab] = "$\Gamma$"
         plt.xticks(qpoint_ticks, parameters["ticklabels"])
         for q in range(len(qpoint_ticks)):
             plt.plot([qpoint_ticks[q] for _ in range(100)], np.linspace(np.min(frequencies)-100, np.max(frequencies) + 100, 100), 'k-', lw = 0.5)
@@ -214,7 +214,7 @@ def processBands(band_file):
         plt.ylim(np.min(frequencies) - 33, np.max(frequencies) + 33)
         plt.ylabel(r'$\omega$ (cm$^{-1}$)', fontsize = 15)
     if parameters["save"] != None:
-        plt.savefig(parameters["save"]+".pdf", format = 'pdf')
+        plt.savefig(parameters["save"][0]+".pdf", format = 'pdf')
     else:
         plt.savefig('phonon_disperion.pdf', format = 'pdf')
 
@@ -228,4 +228,3 @@ if mesh_file == None and irreps_file != None:
     frequency_table = processIrreps(band_file)
 if mesh_file == None and irreps_file == None and band_file != None:
     processBands(band_file)
-
