@@ -16,21 +16,29 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-u", "--units", type=str, choices =["meV", "cm1"], help="units to plot dispersion: meV or cm^-1", default = "meV")
-parser.add_argument("-f", "--band_file", type=str, help="a yaml file containing bands from phonopy")
+parser.add_argument("-f", "--band_file", type=str, help="a yaml file containing bands from phonopy", default = "band.yaml")
 parser.add_argument("-k", "--kpath", nargs="+", default = [])
 parser.add_argument("--xmin", type=int, default = None)
 parser.add_argument("--ymin", type=int, default = None)
 parser.add_argument("--xmax", type=int, default = None)
 parser.add_argument("--ymax", type=int, default = None)
 parser.add_argument("-s", "--save", default = None)
+parser.add_argument("--atoms", nargs = "+", default = [], help = "a list of atoms for which to plot the eigenvectors in the xy plane and z direction")
+
+
 args = parser.parse_args()
 
+args.atoms = list(map(int, args.atoms))
 
 def main(args):
 
+    plt.figure()
+
     convert2cm1 = 33.356
     convert2meV = 4.136
-
+    in_colors = ['r', 'b', 'g']
+    out_colors = ['orange', 'cyan', 'darkgreen']
+    markers = ['o', 's', '^']
     band_file = args.band_file
 
     print("Processing band file...{0:s}".format(band_file))
@@ -39,8 +47,9 @@ def main(args):
 
     qpoints = bands["nqpoint"]
     segments = bands["segment_nqpoint"]
+    atom_labels = [bands["points"][i]["symbol"] for i in range(len(bands["points"]))]
 
-    labels, count = np.unique([bands["points"][i]["symbol"] for i in range(len(bands["points"]))], return_counts = True)
+    labels, count = np.unique(atom_labels, return_counts = True)
 
     frequencies = []
     distance = []
@@ -62,47 +71,43 @@ def main(args):
     qpoint_ticks[-1] -= 1
     qpoint_ticks = [distance[qpoint_ticks[q]] for q in range(len(qpoint_ticks))]
 
-    La_ip = []
-    La_op = []
-    Ni_ip = []
-    Ni_op = []
-    O_ip = []
-    O_op = []
-    for i in range(len(bands["phonon"])):
-        for j in range(len(bands["phonon"][i]["band"])):
-            if args.units == "meV":
-                frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2meV)
-            elif args.units == "cm1":
-                frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2cm1)
+    if len(args.atoms) == 0:
+        for i in range(len(bands["phonon"])):
+            for j in range(len(bands["phonon"][i]["band"])):
+                if args.units == "meV":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2meV)
+                elif args.units == "cm1":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2cm1)
+        frequencies = np.transpose(np.array(frequencies).reshape(qpoints, len(bands["phonon"][0]["band"])))
+        for f in range(len(frequencies)):
+            plt.plot(distance, frequencies[f], color = 'k', lw =1)
+    else:
+        for i in range(len(bands["phonon"])):
+            for j in range(len(bands["phonon"][i]["band"])):
+                if args.units == "meV":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2meV)
+                elif args.units == "cm1":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2cm1)
+        frequencies = np.transpose(np.array(frequencies).reshape(qpoints, len(bands["phonon"][0]["band"])))
+        for f in range(len(frequencies)):
+            plt.plot(distance, frequencies[f], color = 'k', lw = 1)
+        for a in range(len(args.atoms)):
+            print("Getting the eigenvector data for atom {0:s} with index {1:d}".format(atom_labels[args.atoms[a]], args.atoms[a]))
+            in_plane = []
+            out_plane = []
+            for i in range(len(bands["phonon"])):
+                for j in range(len(bands["phonon"][i]["band"])):
+                    eigenVectors = np.array([bands["phonon"][i]["band"][j]["eigenvector"][atom][real][0] for atom in range(bands["natom"]) for real in range(3)]).reshape(bands["natom"], 3)
+                    in_plane.append(np.sqrt(eigenVectors[a][0]**2 + eigenVectors[a][1]**2))
+                    out_plane.append(eigenVectors[a][2])
+            in_plane = np.transpose(np.array(in_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
+            out_plane = np.transpose(np.array(out_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
+            for f in range(len(frequencies)):
+                plt.scatter(distance, frequencies[f], 100*in_plane[f], color = in_colors[a % len(in_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 0.5)
+                plt.scatter(distance, frequencies[f], 100*out_plane[f], color = out_colors[a % len(out_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 0.5)
+            in_plane = []
+            out_plane = []
 
-            eigenVectors = np.array([bands["phonon"][i]["band"][j]["eigenvector"][atom][real][0] for atom in range(bands["natom"]) for real in range(3)]).reshape(bands["natom"], 3)
-            La_ip.append(sum([np.sqrt(eigenVectors[k][0]**2 + eigenVectors[k][1]**2) for k in [0]]))
-            La_op.append(sum([eigenVectors[k][2] for k in [0]]))
-            Ni_ip.append(sum( [np.sqrt(eigenVectors[k][0]**2 + eigenVectors[k][1]**2) for k in [4]]))
-            Ni_op.append(sum([eigenVectors[k][2] for k in [4]]))
-            O_ip.append(sum([np.sqrt(eigenVectors[k][0]**2 + eigenVectors[k][1]**2) for k in [9]]))
-            O_op.append(sum([ eigenVectors[k][2] for k in [9]]))
-
-
-    frequencies = np.transpose(np.array(frequencies).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    La_ip       = np.transpose(np.array(La_ip).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    La_op       = np.transpose(np.array(La_op).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    Ni_ip       = np.transpose(np.array(Ni_ip).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    Ni_op       = np.transpose(np.array(Ni_op).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    O_ip       = np.transpose(np.array(O_ip).reshape(qpoints, len(bands["phonon"][0]["band"])))
-    O_op       = np.transpose(np.array(O_op).reshape(qpoints, len(bands["phonon"][0]["band"])))
-
-
-    plt.figure()
-
-    for f in range(len(frequencies)):
-        plt.plot(distance, frequencies[f], color = 'k', lw = 1)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(La_ip[f], np.arange(0, La_ip[f].size, 2)), marker = "o", color = 'red', linewidth = 0.5)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(La_op[f], np.arange(0, La_op[f].size, 2)), marker = "o", color = 'orange', linewidth = 0.5)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(Ni_ip[f], np.arange(0, Ni_ip[f].size, 2)), marker = "^", color = 'blue',  linewidth = 0.5)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(Ni_op[f], np.arange(0, Ni_op[f].size, 2)), marker = "^", color = 'cyan',  linewidth = 0.5)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(O_ip[f], np.arange(0, O_ip[f].size, 2)), marker = "s", color = 'green',  linewidth = 0.5)
-        plt.scatter(np.delete(distance, np.arange(0, distance.size, 2)), np.delete(frequencies[f], np.arange(0, frequencies[f].size, 2)), 100*np.delete(O_op[f], np.arange(0, O_op[f].size, 2)), marker = "s", color = 'limegreen', linewidth = 0.5)
 
     for q in range(len(qpoint_ticks)):
         plt.plot([qpoint_ticks[q] for _ in range(100)], np.linspace(np.min(frequencies)-100, np.max(frequencies) + 100, 100), 'k-', lw = 0.5)
