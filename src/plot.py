@@ -1,8 +1,15 @@
-import numpy as np
+################################################################################
+#                                   PhononTools                                #
+# Program: plot                                                                #
+# Descripton: plot phonon dispersion with or without eigenvector weights, as   #
+# well as plot the phonon density of states provided by Phonopy.               #
+# Author: Harrison LaBollita                                                   #
+################################################################################
 import matplotlib.pyplot as plt
 import yaml
 import sys
 import warnings
+import numpy as np
 
 warnings.filterwarnings("ignore")
 try:
@@ -11,29 +18,11 @@ except:
     print("The {} mpl-style is not currently available. This is available on Github".format("band_publish"))
 
 
-import argparse
 
-parser = argparse.ArgumentParser()
+def phononTools_plot(args):
 
-parser.add_argument("-u", "--units", type=str, choices =["meV", "cm1"], help="units to plot dispersion: meV or cm^-1", default = "meV")
-parser.add_argument("-f", "--band_file", type=str, help="a yaml file containing bands from phonopy", default = "band.yaml")
-parser.add_argument("-k", "--kpath", nargs="+", default = [])
-parser.add_argument("--xmin", type=int, default = None)
-parser.add_argument("--ymin", type=int, default = None)
-parser.add_argument("--xmax", type=int, default = None)
-parser.add_argument("--ymax", type=int, default = None)
-parser.add_argument("-s", "--save", default = None)
-parser.add_argument("--atoms", nargs = "+", default = [], help = "a list of atoms for which to plot the eigenvectors in the xy plane and z direction")
-
-
-args = parser.parse_args()
-
-args.atoms = list(map(int, args.atoms))
-
-def main(args):
-
-    plt.figure()
-
+    plt.figure(figsize = (4, 6))
+    myRed = '#FF503D'
     convert2cm1 = 33.356
     convert2meV = 4.136
     in_colors = ['r', 'b', 'g']
@@ -58,8 +47,12 @@ def main(args):
     try:
         test = bands["phonon"][0]["band"][0]["eigenvector"]
     except:
-        print("Eigenvectors are not found in file {0:s}".format(band_file))
-        sys.exit(1)
+        if len(args.atoms) == 0 and not args.sum:
+            pass
+        else:
+            print("Eigenvectors are not found in file {0:s}".format(band_file))
+            sys.exit(1)
+
 
     distance = np.array([bands["phonon"][i]["distance"] for i in range(len(bands["phonon"]))])
 
@@ -71,7 +64,7 @@ def main(args):
     qpoint_ticks[-1] -= 1
     qpoint_ticks = [distance[qpoint_ticks[q]] for q in range(len(qpoint_ticks))]
 
-    if len(args.atoms) == 0:
+    if len(args.atoms) == 0 and not args.sum:
         for i in range(len(bands["phonon"])):
             for j in range(len(bands["phonon"][i]["band"])):
                 if args.units == "meV":
@@ -80,8 +73,8 @@ def main(args):
                     frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2cm1)
         frequencies = np.transpose(np.array(frequencies).reshape(qpoints, len(bands["phonon"][0]["band"])))
         for f in range(len(frequencies)):
-            plt.plot(distance, frequencies[f], color = 'k', lw =1)
-    else:
+            plt.plot(distance, frequencies[f], color = myRed, lw =1)
+    elif len(args.atoms) != 0 and not args.sum:
         for i in range(len(bands["phonon"])):
             for j in range(len(bands["phonon"][i]["band"])):
                 if args.units == "meV":
@@ -98,19 +91,57 @@ def main(args):
             for i in range(len(bands["phonon"])):
                 for j in range(len(bands["phonon"][i]["band"])):
                     eigenVectors = np.array([bands["phonon"][i]["band"][j]["eigenvector"][atom][real][0] for atom in range(bands["natom"]) for real in range(3)]).reshape(bands["natom"], 3)
-                    in_plane.append(np.sqrt(eigenVectors[a][0]**2 + eigenVectors[a][1]**2))
-                    out_plane.append(eigenVectors[a][2])
+                    in_plane.append(np.sqrt(eigenVectors[args.atoms[a]][0]**2 + eigenVectors[args.atoms[a]][1]**2))
+                    out_plane.append(eigenVectors[args.atoms[a]][2])
+            in_plane = np.transpose(np.array(in_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
+            out_plane = np.transpose(np.array(out_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
+            if len(args.colors) == 0:
+                for f in range(len(frequencies)):
+                    plt.scatter(distance, frequencies[f], args.weight*in_plane[f], color = in_colors[a % len(in_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
+                    plt.scatter(distance, frequencies[f], args.weight*out_plane[f], color = out_colors[a % len(out_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
+            else:
+                for f in range(len(frequencies)):
+                    plt.scatter(distance, frequencies[f], args.weight*in_plane[f], color = args.colors[0], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
+                    plt.scatter(distance, frequencies[f], args.weight*out_plane[f], color = args.colors[1], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
+            in_plane = []
+            out_plane = []
+    else:
+        # In this case, we would like to plot the eigenvectors from each of the
+        # atomic species.
+        for i in range(len(bands["phonon"])):
+            for j in range(len(bands["phonon"][i]["band"])):
+                if args.units == "meV":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2meV)
+                elif args.units == "cm1":
+                    frequencies.append(bands["phonon"][i]["band"][j]["frequency"]*convert2cm1)
+        frequencies = np.transpose(np.array(frequencies).reshape(qpoints, len(bands["phonon"][0]["band"])))
+        for f in range(len(frequencies)):
+            plt.plot(distance, frequencies[f], color = 'k', lw =1)
+
+        start = 0
+        for a in range(len(labels)):
+            print("Getting the eigenvector data for {0:d} {1:s} atoms".format(count[a], labels[a]))
+            in_plane = []
+            out_plane = []
+            stop = start + count[a]
+            print(start)
+            print(stop)
+            for i in range(len(bands["phonon"])):
+                for j in range(len(bands["phonon"][i]["band"])):
+                    eigenVectors = np.array([bands["phonon"][i]["band"][j]["eigenvector"][atom][real][0] for atom in range(bands["natom"]) for real in range(3)]).reshape(bands["natom"], 3)
+                    in_plane.append(sum( [ np.sqrt(eigenVectors[b][0]**2 + eigenVectors[b][1]**2) for b in range(start, stop)])/count[a])
+                    out_plane.append(sum( [ eigenVectors[b][2] for b in range(start, stop)])/count[a])
+            start = stop
             in_plane = np.transpose(np.array(in_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
             out_plane = np.transpose(np.array(out_plane).reshape(qpoints, len(bands["phonon"][0]["band"])))
             for f in range(len(frequencies)):
-                plt.scatter(distance, frequencies[f], 100*in_plane[f], color = in_colors[a % len(in_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 0.5)
-                plt.scatter(distance, frequencies[f], 100*out_plane[f], color = out_colors[a % len(out_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 0.5)
+                plt.scatter(distance, frequencies[f], args.weight*in_plane[f], color = in_colors[a % len(in_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
+                plt.scatter(distance, frequencies[f], args.weight*out_plane[f], color = out_colors[a % len(out_colors)], marker = markers[a % len(markers)], facecolors = "none", linewidth = 1.0)
             in_plane = []
             out_plane = []
-
-
     for q in range(len(qpoint_ticks)):
         plt.plot([qpoint_ticks[q] for _ in range(100)], np.linspace(np.min(frequencies)-100, np.max(frequencies) + 100, 100), 'k-', lw = 0.5)
+
     plt.plot(np.linspace(np.min(distance), np.max(distance), 100), [0 for _ in range(100)], 'k--', lw = 0.5)
 
     if args.units == "meV":
@@ -120,6 +151,7 @@ def main(args):
 
 
     if len(args.kpath) == 0:
+        plt.xticks(qpoint_ticks)
         plt.xlabel(r"${\bf q}$", fontsize = 15)
     else:
         tick_labels = args.kpath
@@ -158,14 +190,8 @@ def main(args):
 
 
     if args.save != None:
+        print("Saving figure to file {}".format(args.save +".pdf"))
         plt.savefig(args.save + ".pdf", format = "pdf")
     else:
         plt.show()
 
-
-
-
-
-
-if __name__ == "__main__":
-    main(args)
