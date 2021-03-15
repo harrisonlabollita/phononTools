@@ -29,6 +29,7 @@ def phononTools_plot(args):
     in_colors = ['r', 'b', 'g']
     out_colors = ['orange', 'cyan', 'darkgreen']
     markers = ['o', 's', '^']
+
     band_file = args.band_file
 
     print("Processing band file...{0:s}".format(band_file))

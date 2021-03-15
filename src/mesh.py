@@ -13,9 +13,9 @@ def phononTools_mesh(mesh_file, qpoint, unit):
     # Inputs: mesh.yaml file, qpoint to get eigenvectors and eigenvalues, unit
     # to convert phonon frequency to.
     # Output: frequencies and eigenvectors at the given qpoint
-
     convert2cm1 = 33.356
     convert2meV = 4.136
+
     print("Processing mesh file...{0:s}".format(mesh_file))
     mesh = yaml.load(open(mesh_file), Loader=yaml.FullLoader)
     print("Getting eigenvectors at q-point {0} for {1} atoms".format(mesh["phonon"][qpoint]["q-position"], mesh["natom"]))
