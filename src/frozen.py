@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # setup a frozen phonon calculation for a cluster
 # after running phonopy -d --dim=" X X X" -c POSCAR
 # this script will setup the directories for the cluster

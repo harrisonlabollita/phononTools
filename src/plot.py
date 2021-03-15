@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 ################################################################################
 #                                   PhononTools                                #
 # Program: plot                                                                #
@@ -124,8 +125,6 @@ def phononTools_plot(args):
             in_plane = []
             out_plane = []
             stop = start + count[a]
-            print(start)
-            print(stop)
             for i in range(len(bands["phonon"])):
                 for j in range(len(bands["phonon"][i]["band"])):
                     eigenVectors = np.array([bands["phonon"][i]["band"][j]["eigenvector"][atom][real][0] for atom in range(bands["natom"]) for real in range(3)]).reshape(bands["natom"], 3)
