@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 try:
     plt.style.use("publish")
 except:
-    print("The {} mpl-style is not currently available. This is available on Github".format("band_publish"))
+    print("The {} mpl-style is not currently available. This is available on Github".format("publish"))
 
 
 

@@ -14,12 +14,12 @@ from mesh import phononTools_mesh
 from irreps import phononTools_irreps
 from plot import phononTools_plot
 from dos import phononTools_dos
-
+from band_dos import phononTools_band_dos
 def main():
 
     args = phononTools_parse()
 
-    if args.mesh_file != None and args.dos == None:
+    if args.mesh_file != None:
         pFreq, pVecs = phononTools_mesh(args.mesh_file, args.qpoint, args.units)
         print("We suggst running an interactive python session where one types python -i")
         print("You will be able to access the frequencies and vectors by typing pFreq and pVecs")
@@ -34,10 +34,13 @@ def main():
     else:
         pFreqTable = None
 
-    if args.band_file != None:
+    if args.band_file != None and args.dos != None:
+        phononTools_band_dos(args)
+
+    elif args.band_file != None and args.dos == None:
         phononTools_plot(args)
 
-    if args.dos != None:
+    elif args.band_file == None and args.dos != None:
         phononTools_dos(args)
 
     if args.band_file == None and pFreq == None and pVecs == None and pFreqTable == None:

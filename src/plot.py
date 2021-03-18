@@ -27,7 +27,7 @@ def phononTools_plot(args):
     convert2cm1 = 33.356
     convert2meV = 4.136
     in_colors = ['r', 'b', 'g']
-    out_colors = ['orange', 'cyan', 'darkgreen']
+    out_colors = ['orange', 'cyan', 'limegreen']
     markers = ['o', 's', '^']
 
     band_file = args.band_file
