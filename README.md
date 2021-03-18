@@ -9,6 +9,7 @@ As of now, a user can:
 - [x] Plot the phonon dispersion (including a weighted dispersion, where the weights are given by the modulus of the in-plane and out-plane eigenvectors for a given phonon mode and q-point vector.
 
 - [x] Plot the phonon density of states.
+- [x] Plot bands and density of states.
 
 - [x] Analyze the normal modes at a given q-point vector.
   - [x] Write the irreducible representation of the phonon modes.
