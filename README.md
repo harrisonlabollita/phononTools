@@ -1,5 +1,5 @@
 # PhononTools
-![[phononTools](phononTools.png)
+![phononTools](phononTools.png)
 
 
 ### Description
