@@ -8,7 +8,7 @@
 ################################################################################
 import yaml
 import numpy as np
-def phononTools_mesh(mesh_file, qpoint, unit):
+def mesh(mesh_file, qpoint, unit):
     # Description: Routine to process a mesh.yaml file
     # Inputs: mesh.yaml file, qpoint to get eigenvectors and eigenvalues, unit
     # to convert phonon frequency to.

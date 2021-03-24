@@ -20,7 +20,7 @@ except:
 
 
 
-def phononTools_plot(args):
+def plot(args):
 
     plt.figure(figsize = (4, 6))
     myRed = '#FF503D'

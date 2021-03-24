@@ -9,18 +9,19 @@ import numpy as np
 import yaml
 import matplotlib.pyplot as plt
 
-from parse import phononTools_parse
-from mesh import phononTools_mesh
-from irreps import phononTools_irreps
-from plot import phononTools_plot
-from dos import phononTools_dos
-from band_dos import phononTools_band_dos
+from phononTools.base.parse import parse 
+from phononTools.base.mesh import mesh
+from phononTools.base.irreps import irreps
+from phononTools.base.plot import plot
+from phononTools.base.dos import dos
+from phononTools.base.band_dos import band_dos
+
 def main():
 
-    args = phononTools_parse()
+    args = parse()
 
     if args.mesh_file != None:
-        pFreq, pVecs = phononTools_mesh(args.mesh_file, args.qpoint, args.units)
+        pFreq, pVecs = mesh(args.mesh_file, args.qpoint, args.units)
         print("We suggst running an interactive python session where one types python -i")
         print("You will be able to access the frequencies and vectors by typing pFreq and pVecs")
     else:
@@ -28,20 +29,20 @@ def main():
         pVecs = None
 
     if args.irreps_file != None:
-        pFreqTable = phononTools_irreps(args.irreps_file, args.units)
+        pFreqTable = irreps(args.irreps_file, args.units)
         print("We suggst running an interactive python session where one types python -i")
         print("You will be able to access the character table by typing pFreqTable")
     else:
         pFreqTable = None
 
     if args.band_file != None and args.dos != None:
-        phononTools_band_dos(args)
+        band_dos(args)
 
     elif args.band_file != None and args.dos == None:
-        phononTools_plot(args)
+        plot(args)
 
     elif args.band_file == None and args.dos != None:
-        phononTools_dos(args)
+        dos(args)
 
     if args.band_file == None and pFreq == None and pVecs == None and pFreqTable == None:
         print("PhononTools requires at least one yaml file. For more information, try python phononTools.py -h")

@@ -7,7 +7,7 @@
 ################################################################################
 import yaml
 import numpy as np
-def phononTools_irreps(irreps_file, units):
+def irreps(irreps_file, units):
     # Description: Process a irreps.yaml file
     # Input: yaml file from phonopy, specify the units to output frequencies
     # Output: A character table with the corresponding frequncies

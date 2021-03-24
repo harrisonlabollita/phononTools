@@ -10,9 +10,9 @@ import yaml
 import sys
 import warnings
 import numpy as np
-from units import convert2cm1, convert2meV
+from phononTools.base.units import convert2cm1, convert2meV
 
-def phononTools_band_dos(args):
+def band_dos(args):
     myRed = '#FF503D'
     myGreen = '#90AF3D'
     myOrange = '#DF9B34'

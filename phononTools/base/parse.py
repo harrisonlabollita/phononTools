@@ -6,7 +6,7 @@
 # Author: Harrison LaBollita                                                   #
 ################################################################################
 
-def phononTools_parse():
+def parse():
 
     import argparse
     parser = argparse.ArgumentParser()
