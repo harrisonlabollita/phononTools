@@ -34,4 +34,7 @@ def mesh(mesh_file, qpoint, unit):
         phononFrequencies.append(eigenValue)
         phononNormalModes.append(eigenVectors)
     phononNormalModes = np.array(phononNormalModes).reshape(len(mesh["phonon"][qpoint]["band"]), mesh["natom"], 3)
+    for m in range(len(phononFrequencies)):
+        print("Frequency: {0:0.4f} {1:s}\n".format(phononFrequencies[m], unit))
+        print(phononNormalModes[m])
     return phononFrequencies, phononNormalModes

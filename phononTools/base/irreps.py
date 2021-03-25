@@ -40,4 +40,7 @@ def irreps(irreps_file, units):
                     frequencies.append(irreps["normal_modes"][fre]["frequency"])
 
         frequency_table[char] = frequencies
+    for key, item in frequency_table.items():
+        print(key)
+        print(item)
     return frequency_table
