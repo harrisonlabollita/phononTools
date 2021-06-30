@@ -7,6 +7,8 @@
 ################################################################################
 import yaml
 import numpy as np
+
+
 def irreps(irreps_file, units):
     # Description: Process a irreps.yaml file
     # Input: yaml file from phonopy, specify the units to output frequencies
@@ -40,7 +42,17 @@ def irreps(irreps_file, units):
                     frequencies.append(irreps["normal_modes"][fre]["frequency"])
 
         frequency_table[char] = frequencies
-    for key, item in frequency_table.items():
-        print(key)
-        print(item)
+    keys = []
+    freqs = []
+    for (key, item) in frequency_table.items():
+        for val in item:
+            keys.append(key)
+            freqs.append(val)
+    keys = np.array(keys)
+    freqs = np.array(freqs)
+    sorted = np.argsort(freqs)
+    freqs = freqs[sorted]
+    keys = keys[sorted]
+    for i in range(len(freqs)):
+        print("{}    {}".format(keys[i], freqs[i]))
     return frequency_table
