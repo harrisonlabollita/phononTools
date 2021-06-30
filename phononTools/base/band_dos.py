@@ -12,6 +12,12 @@ import warnings
 import numpy as np
 from phononTools.base.units import convert2cm1, convert2meV
 
+
+def unique(atom_labels):
+    uniq, index, counts = np.unique(atom_labels, return_index=True, return_counts=True)
+    return uniq[index.argsort()], counts[index.argsort()]
+            
+
 def band_dos(args):
     myRed = '#FF503D'
     myGreen = '#90AF3D'
@@ -26,7 +32,10 @@ def band_dos(args):
     qpoints = bands["nqpoint"]
     segments = bands["segment_nqpoint"]
     atom_labels = [bands["points"][i]["symbol"] for i in range(len(bands["points"]))]
-    labels, count = np.unique(atom_labels, return_counts = True)
+    labels, count = unique(atom_labels)
+
+    print("atoms :", labels)
+    print("mult. :", count)
 
     frequencies = []
     distance = []

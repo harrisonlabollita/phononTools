@@ -17,8 +17,6 @@ except:
     print("The {} mpl-style is not currently available. This is available on Github".format("publish"))
 
 
-
-
 def dos(args):
     convert2cm1 = 33.356
     convert2meV = 4.136
@@ -33,7 +31,8 @@ def dos(args):
     mesh = yaml.load(open(args.mesh_file), Loader = yaml.FullLoader)
     atom_labels = [mesh["points"][i]["symbol"] for i in range(len(mesh["points"]))]
     labels, count = np.unique(atom_labels, return_counts = True)
-
+    print("atom labels :", labels)
+    print("multiplicity :", count)
     dos = np.loadtxt(args.dos)
 
     if args.units == "meV":
