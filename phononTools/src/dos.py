@@ -32,7 +32,7 @@ def dos(args):
     plt.figure()
 
     data = yaml.load(open(os.path.join(os.getcwd(), "phonopy.yaml")), Loader = yaml.FullLoader)
-    atom_labels = [data["unit_cell"]["points"][i]["symbol"] for i in range(len(data["unit_cell"]["points"]))]
+    atom_labels = [data["primitive_cell"]["points"][i]["symbol"] for i in range(len(data["primitive_cell"]["points"]))]
     labels, count = unique(atom_labels)
     print("atom labels :", labels)
     print("multiplicity :", count)
