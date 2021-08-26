@@ -33,7 +33,7 @@ def parse():
     parser.add_argument("--colors", nargs = "+", default = [], help = "a list of colors used for eigenvector plotting")
     # plotting dos
     parser.add_argument("--dos", type = str, default = None, help ="file for plotting density of states")
-    parser.add_argument("--orientation", default = "h", choices = ["v", "h"], help = "define the axes that you would like to plot the dos")
+    parser.add_argument("--orientation", default = "v", choices = ["v", "h"], help = "define the axes that you would like to plot the dos")
     args = parser.parse_args()
 
     args.atoms = list(map(int, args.atoms))

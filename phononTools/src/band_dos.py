@@ -18,6 +18,18 @@ def unique(atom_labels):
     return uniq[index.argsort()], counts[index.argsort()]
             
 
+def txt2latex(text):
+    latex = {}
+    latex["Gamma"] = r"$\Gamma$"
+    latex["A0"]    = r"A$_{0}$"
+    latex["Sigma0"] = r"$\Sigma_{0}$"
+
+    try:
+        latex[text]
+        return latex[text]
+    except:
+        return text
+
 def band_dos(args):
     myRed = '#FF503D'
     myGreen = '#90AF3D'
@@ -79,8 +91,7 @@ def band_dos(args):
     else:
         tick_labels = args.kpath
         for t in range(len(tick_labels)):
-            if tick_labels[t] == "Gamma":
-                tick_labels[t] = "$\Gamma$"
+            tick_labels[t] = txt2latex(tick_labels[t])
         ax[0].set_xticks(qpoint_ticks)
         ax[0].set_xticklabels(tick_labels)
 
@@ -115,23 +126,23 @@ def band_dos(args):
     dos = np.loadtxt(args.dos)
 
     if args.units == "meV":
-        omega = [dos[i][0]*convert2meV for i in range(len(dos))]
+        omega = dos[:, 0]*convert2meV
     elif args.units == "cm1":
-        omega = [dos[i][0]*convert2cm1 for i in range(len(dos))]
+        omega = dos[:, 0]*convert2cm1
     else:
-        omega = [dos[i][0] for i in range(len(dos))]
+        omega = dos[:, 0]
 
     start = 1
     gmax = 0
     for atom in range(len(labels)):
-        g = []
         stop = start + count[atom]
-        for i in range(len(dos)):
-            g.append(sum([dos[i][a] for a in range(start, stop)])/count[atom])
+        g = np.sum(dos[:, start:stop], axis = 1)/count[atom]
         gmax = np.max(g) if np.max(g) > gmax else gmax
         start = stop
-        ax[1].plot(g, omega, color = colors[atom % len(colors)], lw =1, label = labels[atom])
-
+        if args.orientation == "v":
+            plt.plot(g, omega, color = colors[atom % len(colors)], lw =1, label = labels[atom])
+        else:
+            plt.plot(omega, g, color = colors[atom % len(colors)], lw =1, label = labels[atom])
     ax[1].plot(np.linspace(0, np.max(dos), 100), [0 for _ in range(100)], 'k--', lw = 0.5)
     ax[1].set_xlim(0, gmax + 0.025*gmax)
     ax[1].legend()
