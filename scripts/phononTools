@@ -20,7 +20,7 @@ def main():
 
     args = parse()
 
-    if args.mesh_file != None:
+    if args.mesh_file != None and args.dos is None:
         pFreq, pVecs = mesh(args.mesh_file, args.qpoint, args.units)
     else:
         pFreq = None

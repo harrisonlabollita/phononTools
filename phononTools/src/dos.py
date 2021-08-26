@@ -10,6 +10,7 @@ import sys
 import warnings
 import numpy as np
 import yaml
+import os
 warnings.filterwarnings("ignore")
 try:
     plt.style.use("publish")
@@ -28,32 +29,27 @@ def dos(args):
 
     colors = ['#90AF3D', '#DF9B34', '#5F82AF']
 
-    if args.mesh_file == None:
-        print("Need a mesh.yaml file to plot the phonon density of states")
-        sys.exit(1)
     plt.figure()
 
-    mesh = yaml.load(open(args.mesh_file), Loader = yaml.FullLoader)
-    atom_labels = [mesh["points"][i]["symbol"] for i in range(len(mesh["points"]))]
-    labels, count = unique(atom_labels, return_counts = True)
+    data = yaml.load(open(os.path.join(os.getcwd(), "phonopy.yaml")), Loader = yaml.FullLoader)
+    atom_labels = [data["unit_cell"]["points"][i]["symbol"] for i in range(len(data["unit_cell"]["points"]))]
+    labels, count = unique(atom_labels)
     print("atom labels :", labels)
     print("multiplicity :", count)
     dos = np.loadtxt(args.dos)
 
     if args.units == "meV":
-        omega = [dos[i][0]*convert2meV for i in range(len(dos))]
+        omega = dos[:, 0]*convert2meV
     elif args.units == "cm1":
-        omega = [dos[i][0]*convert2cm1 for i in range(len(dos))]
+        omega = dos[:, 0]*convert2cm1
     else:
-        omega = [dos[i][0] for i in range(len(dos))]
+        omega = dos[:, 0]
 
     start = 1
     gmax = 0
     for atom in range(len(labels)):
-        g = []
         stop = start + count[atom]
-        for i in range(len(dos)):
-            g.append(sum([dos[i][a] for a in range(start, stop)])/count[atom])
+        g = np.sum(dos[:, start:stop], axis = 1)/count[atom]
         gmax = np.max(g) if np.max(g) > gmax else gmax
         start = stop
         if args.orientation == "v":

@@ -19,6 +19,17 @@ except:
     print("The {} mpl-style is not currently available. This is available on Github".format("band_publish"))
 
 
+def txt2latex(text):
+    latex = {}
+    latex["Gamma"] = r"$\Gamma$"
+    latex["A0"]    = r"A$_{0}$"
+    latex["Sigma0"] = r"$\Sigma_{0}$"
+
+    try:
+        latex[text]
+        return latex[text]
+    except:
+        return text
 
 def plot(args):
 
@@ -156,8 +167,7 @@ def plot(args):
     else:
         tick_labels = args.kpath
         for t in range(len(tick_labels)):
-            if tick_labels[t] == "Gamma":
-                tick_labels[t] = "$\Gamma$"
+            tick_labels[t] = txt2latex(tick_labels[t])
         plt.xticks(qpoint_ticks, tick_labels, fontsize = 15)
 
     if args.xmin == None and args.xmax == None:
