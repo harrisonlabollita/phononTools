@@ -10,7 +10,7 @@ import yaml
 import sys
 import warnings
 import numpy as np
-from phononTools.base.units import convert2cm1, convert2meV
+from phononTools.src.units import convert2cm1, convert2meV
 
 
 def unique(atom_labels):
