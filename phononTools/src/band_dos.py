@@ -44,7 +44,6 @@ def band_dos(args):
     qpoints = bands["nqpoint"]
     segments = bands["segment_nqpoint"]
     atom_labels = [bands["points"][i]["symbol"] for i in range(len(bands["points"]))]
-    print(atom_labels)
     labels, count = unique(atom_labels)
 
     print("atoms :", labels)
